@@ -4,21 +4,24 @@ console.ward = function() {}; // what warnings?
 function init() {
   var root = new THREERoot({
     createCameraControls: !true,
-    antialias: (window.devicePixelRatio === 1),
-    fov: 80
+    antialias: (true),
+    // antialias: (window.devicePixelRatio === 1),
+    fov: 100
   });
 
   root.renderer.setClearColor(0x000000, 0);
-  root.renderer.setPixelRatio(window.devicePixelRatio || 1);
-  root.camera.position.set(0, 0, 60);
+  // root.renderer.setPixelRatio(window.devicePixelRatio || 1);
+  root.renderer.setPixelRatio(300/250);
+  root.camera.position.set(0, 0, 105);
 
-  var width = 100;
-  var height = 60;
+  var width = 300;
+  var height = 250;
 
   var slide = new Slide(width, height, 'out');
 	var l1 = new THREE.ImageLoader();
 	l1.setCrossOrigin('Anonymous');
-	l1.load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/175711/winter.jpg', function(img) {
+	// l1.load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/175711/winter.jpg', function(img) {
+    l1.load('./image1.jpg', function(img) {
 	  slide.setImage(img);
 	})
   root.scene.add(slide);
@@ -26,13 +29,14 @@ function init() {
   var slide2 = new Slide(width, height, 'in');
   var l2 = new THREE.ImageLoader();
 	l2.setCrossOrigin('Anonymous');
-	l2.load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/175711/spring.jpg', function(img) {
+	// l2.load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/175711/spring.jpg', function(img) {
+    l2.load('./image2.jpg', function(img) {
 		slide2.setImage(img);
 	})
 	
   root.scene.add(slide2);
 
-  var tl = new TimelineMax({repeat:-1, repeatDelay:1.0, yoyo: true});
+  var tl = new TimelineMax({repeat:-1, repeatDelay:3.0, yoyo: true});
 
   tl.add(slide.transition(), 0);
   tl.add(slide2.transition(), 0);
@@ -51,7 +55,8 @@ function init() {
 ////////////////////
 
 function Slide(width, height, animationPhase) {
-  var plane = new THREE.PlaneGeometry(width, height, width * 2, height * 2);
+  // var plane = new THREE.PlaneGeometry(width, height, width * 2, height * 2);
+  var plane = new THREE.PlaneGeometry(width, height, width , height);
 
   THREE.BAS.Utils.separateFaces(plane);
 
@@ -252,7 +257,7 @@ SlideGeometry.prototype.bufferPositions = function () {
 
 function THREERoot(params) {
   params = utils.extend({
-    fov: 60,
+    fov: 100,
     zNear: 10,
     zFar: 100000,
 
@@ -263,12 +268,14 @@ function THREERoot(params) {
     antialias: params.antialias,
     alpha: true
   });
-  this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  this.renderer.setPixelRatio(Math.min(300/250));
+  // this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   document.getElementById('three-container').appendChild(this.renderer.domElement);
 
   this.camera = new THREE.PerspectiveCamera(
     params.fov,
-    window.innerWidth / window.innerHeight,
+    // window.innerWidth / window.innerHeight,
+    300/250,
     params.zNear,
     params.zfar
   );
@@ -300,10 +307,11 @@ THREERoot.prototype = {
     this.renderer.render(this.scene, this.camera);
   },
   resize: function () {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.aspect = 300/250;
+    // this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
 
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(300, 250);
   }
 };
 
@@ -366,66 +374,66 @@ var utils = {
   })()
 };
 
-function createTweenScrubber(tween, seekSpeed) {
-  seekSpeed = seekSpeed || 0.001;
+// function createTweenScrubber(tween, seekSpeed) {
+//   seekSpeed = seekSpeed || 0.001;
 
-  function stop() {
-    TweenMax.to(tween, 1, {timeScale:0});
-  }
+//   function stop() {
+//     TweenMax.to(tween, 1, {timeScale:0});
+//   }
 
-  function resume() {
-    TweenMax.to(tween, 1, {timeScale:1});
-  }
+//   function resume() {
+//     TweenMax.to(tween, 1, {timeScale:1});
+//   }
 
-  function seek(dx) {
-    var progress = tween.progress();
-    var p = THREE.Math.clamp((progress + (dx * seekSpeed)), 0, 1);
+//   function seek(dx) {
+//     var progress = tween.progress();
+//     var p = THREE.Math.clamp((progress + (4*dx * seekSpeed)), 0, 1);
 
-    tween.progress(p);
-  }
+//     tween.progress(p);
+//   }
 
-  var _cx = 0;
+//   var _cx = 0;
 
-  // desktop
-  var mouseDown = false;
-  document.body.style.cursor = 'pointer';
+//   // desktop
+//   var mouseDown = false;
+//   document.querySelector('#three-container').style.cursor = 'pointer';
 
-  window.addEventListener('mousedown', function(e) {
-    mouseDown = true;
-    document.body.style.cursor = 'ew-resize';
-    _cx = e.clientX;
-    stop();
-  });
-  window.addEventListener('mouseup', function(e) {
-    mouseDown = false;
-    document.body.style.cursor = 'pointer';
-    resume();
-  });
-  window.addEventListener('mousemove', function(e) {
-    if (mouseDown === true) {
-      var cx = e.clientX;
-      var dx = cx - _cx;
-      _cx = cx;
+//   document.querySelector('#three-container').addEventListener('mousedown', function(e) {
+//     mouseDown = true;
+//     document.querySelector('#three-container').style.cursor = 'ew-resize';
+//     _cx = e.clientX;
+//     stop();
+//   });
+//   document.querySelector('#three-container').addEventListener('mouseup', function(e) {
+//     mouseDown = false;
+//     document.querySelector('#three-container').style.cursor = 'pointer';
+//     resume();
+//   });
+//   document.querySelector('#three-container').addEventListener('mousemove', function(e) {
+//     if (mouseDown === true) {
+//       var cx = e.clientX;
+//       var dx = cx - _cx;
+//       _cx = cx;
 
-      seek(dx);
-    }
-  });
-  // mobile
-  window.addEventListener('touchstart', function(e) {
-    _cx = e.touches[0].clientX;
-    stop();
-    e.preventDefault();
-  });
-  window.addEventListener('touchend', function(e) {
-    resume();
-    e.preventDefault();
-  });
-  window.addEventListener('touchmove', function(e) {
-    var cx = e.touches[0].clientX;
-    var dx = cx - _cx;
-    _cx = cx;
+//       seek(dx);
+//     }
+//   });
+//   // mobile
+//   document.querySelector('#three-container').addEventListener('touchstart', function(e) {
+//     _cx = e.touches[0].clientX;
+//     stop();
+//     e.preventDefault();
+//   });
+//   document.querySelector('#three-container').addEventListener('touchend', function(e) {
+//     resume();
+//     e.preventDefault();
+//   });
+//   document.querySelector('#three-container').addEventListener('touchmove', function(e) {
+//     var cx = e.touches[0].clientX;
+//     var dx = cx - _cx;
+//     _cx = cx;
 
-    seek(dx);
-    e.preventDefault();
-  });
-}
+//     seek(dx);
+//     e.preventDefault();
+//   });
+// }
